@@ -48,6 +48,7 @@ const ProductCard = ({ product }: { product: ProductType }) => {
             src={product.images?.[productTypes.color] || ""}
             alt={product.name}
             fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             className="object-cover hover:scale-105 transition-all duration-300"
           />
         </div>
@@ -83,8 +84,8 @@ const ProductCard = ({ product }: { product: ProductType }) => {
               {product.colors.map((color) => (
                 <div
                   className={`cursor-pointer border-1 ${productTypes.color === color
-                      ? "border-gray-400"
-                      : "border-gray-200"
+                    ? "border-gray-400"
+                    : "border-gray-200"
                     } rounded-full p-[1.2px]`}
                   key={color}
                   onClick={() =>
