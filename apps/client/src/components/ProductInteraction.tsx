@@ -1,7 +1,7 @@
 "use client";
 
 import useCartStore from "@/stores/cartStore";
-import { ProductType } from "@/types";
+import { ProductType } from "@repo/types";
 import { Minus, Plus, ShoppingCart } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
@@ -56,18 +56,16 @@ const ProductInteraction = ({
         <div className="flex items-center gap-2">
           {product.sizes.map((size) => (
             <div
-              className={`cursor-pointer border-1 p-[2px] ${
-                selectedSize === size ? "border-gray-600" : "border-gray-300"
-              }`}
+              className={`cursor-pointer border-1 p-[2px] ${selectedSize === size ? "border-gray-600" : "border-gray-300"
+                }`}
               key={size}
               onClick={() => handleTypeChange("size", size)}
             >
               <div
-                className={`w-6 h-6 text-center flex items-center justify-center ${
-                  selectedSize === size
+                className={`w-6 h-6 text-center flex items-center justify-center ${selectedSize === size
                     ? "bg-black text-white"
                     : "bg-white text-black"
-                }`}
+                  }`}
               >
                 {size.toUpperCase()}
               </div>
@@ -81,9 +79,8 @@ const ProductInteraction = ({
         <div className="flex items-center gap-2">
           {product.colors.map((color) => (
             <div
-              className={`cursor-pointer border-1 p-[2px] ${
-                selectedColor === color ? "border-gray-300" : "border-white"
-              }`}
+              className={`cursor-pointer border-1 p-[2px] ${selectedColor === color ? "border-gray-300" : "border-white"
+                }`}
               key={color}
               onClick={() => handleTypeChange("color", color)}
             >

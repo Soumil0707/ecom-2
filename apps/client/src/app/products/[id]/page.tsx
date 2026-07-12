@@ -1,10 +1,10 @@
 import ProductInteraction from "@/components/ProductInteraction";
-import { ProductType } from "@/types";
+import { ProductType } from "@repo/types";
 import Image from "next/image";
 
 // TEMPORARY
 const product: ProductType = {
-  id: 1,
+  id: 1 as any,
   name: "Adidas CoreFit T-Shirt",
   shortDescription:
     "Lorem ipsum dolor sit amet consect adipisicing elit lorem ipsum dolor sit.",
@@ -18,15 +18,19 @@ const product: ProductType = {
     purple: "/products/1p.png",
     green: "/products/1gr.png",
   },
+  categorySlug: 'test',
+  createdAt: new Date(),
+  updatedAt: new Date()
 };
 
 export const generateMetadata = async ({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) => {
-  // TODO:get the product from db
-  // TEMPORARY
+  const { id } = await params;
+  // TODO:get the product from db with id
+  // TEMPORARYw
   return {
     title: product.name,
     describe: product.description,
@@ -49,7 +53,7 @@ const ProductPage = async ({
       {/* IMAGE */}
       <div className="w-full lg:w-5/12 relative aspect-[2/3]">
         <Image
-          src={product.images?.[selectedColor] || ""}
+          src={(product.images as Record<string, string>)?.[selectedColor] || ""}
           alt={product.name}
           fill
           className="object-contain rounded-md"

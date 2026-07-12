@@ -1,4 +1,4 @@
-import { ProductsType } from "@/types";
+import { ProductsType } from "@repo/types";
 import Categories from "./Categories";
 import ProductCard from "./ProductCard";
 import Link from "next/link";
@@ -7,7 +7,7 @@ import Filter from "./Filter";
 // TEMPORARY
 const products: ProductsType = [
   {
-    id: 1,
+    id: 1 as any,
     name: "Adidas CoreFit T-Shirt",
     shortDescription:
       "Lorem ipsum dolor sit amet consect adipisicing elit lorem ipsum dolor sit.",
@@ -21,9 +21,12 @@ const products: ProductsType = [
       purple: "/products/1p.png",
       green: "/products/1gr.png",
     },
+    categorySlug: 'test',
+    createdAt: new Date(),
+    updatedAt: new Date()
   },
   {
-    id: 2,
+    id: 2 as any,
     name: "Puma Ultra Warm Zip",
     shortDescription:
       "Lorem ipsum dolor sit amet consect adipisicing elit lorem ipsum dolor sit.",
@@ -33,9 +36,12 @@ const products: ProductsType = [
     sizes: ["s", "m", "l", "xl"],
     colors: ["gray", "green"],
     images: { gray: "/products/2g.png", green: "/products/2gr.png" },
+    categorySlug: 'test',
+    createdAt: new Date(),
+    updatedAt: new Date()
   },
   {
-    id: 3,
+    id: 3 as any,
     name: "Nike Air Essentials Pullover",
     shortDescription:
       "Lorem ipsum dolor sit amet consect adipisicing elit lorem ipsum dolor sit.",
@@ -49,9 +55,12 @@ const products: ProductsType = [
       blue: "/products/3b.png",
       black: "/products/3bl.png",
     },
+    categorySlug: 'test',
+    createdAt: new Date(),
+    updatedAt: new Date()
   },
   {
-    id: 4,
+    id: 4 as any,
     name: "Nike Dri Flex T-Shirt",
     shortDescription:
       "Lorem ipsum dolor sit amet consect adipisicing elit lorem ipsum dolor sit.",
@@ -61,9 +70,12 @@ const products: ProductsType = [
     sizes: ["s", "m", "l"],
     colors: ["white", "pink"],
     images: { white: "/products/4w.png", pink: "/products/4p.png" },
+    categorySlug: 'test',
+    createdAt: new Date(),
+    updatedAt: new Date()
   },
   {
-    id: 5,
+    id: 5 as any,
     name: "Under Armour StormFleece",
     shortDescription:
       "Lorem ipsum dolor sit amet consect adipisicing elit lorem ipsum dolor sit.",
@@ -77,9 +89,12 @@ const products: ProductsType = [
       orange: "/products/5o.png",
       black: "/products/5bl.png",
     },
+    categorySlug: 'test',
+    createdAt: new Date(),
+    updatedAt: new Date()
   },
   {
-    id: 6,
+    id: 6 as any,
     name: "Nike Air Max 270",
     shortDescription:
       "Lorem ipsum dolor sit amet consect adipisicing elit lorem ipsum dolor sit.",
@@ -89,9 +104,12 @@ const products: ProductsType = [
     sizes: ["40", "42", "43", "44"],
     colors: ["gray", "white"],
     images: { gray: "/products/6g.png", white: "/products/6w.png" },
+    categorySlug: 'test',
+    createdAt: new Date(),
+    updatedAt: new Date()
   },
   {
-    id: 7,
+    id: 7 as any,
     name: "Nike Ultraboost Pulse ",
     shortDescription:
       "Lorem ipsum dolor sit amet consect adipisicing elit lorem ipsum dolor sit.",
@@ -101,9 +119,12 @@ const products: ProductsType = [
     sizes: ["40", "42", "43"],
     colors: ["gray", "pink"],
     images: { gray: "/products/7g.png", pink: "/products/7p.png" },
+    categorySlug: 'test',
+    createdAt: new Date(),
+    updatedAt: new Date()
   },
   {
-    id: 8,
+    id: 123 as any,
     name: "Levi’s Classic Denim",
     shortDescription:
       "Lorem ipsum dolor sit amet consect adipisicing elit lorem ipsum dolor sit.",
@@ -113,14 +134,17 @@ const products: ProductsType = [
     sizes: ["s", "m", "l"],
     colors: ["blue", "green"],
     images: { blue: "/products/8b.png", green: "/products/8gr.png" },
+    categorySlug: 'test',
+    createdAt: new Date(),
+    updatedAt: new Date()
   },
 ];
 
-const ProductList = ({ category,params }: { category: string, params:"homepage" | "products" }) => {
+const ProductList = ({ category, params }: { category: string, params: "homepage" | "products" }) => {
   return (
     <div className="w-full">
       <Categories />
-      {params === "products" && <Filter/>}
+      {params === "products" && <Filter />}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-12">
         {products.map((product) => (
           <ProductCard key={product.id} product={product} />
