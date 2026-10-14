@@ -1,0 +1,11 @@
+name: Manual Echo
+
+on:
+  workflow_dispatch:
+
+jobs:
+  echo-job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Echo running
+        run: echo "running"
