@@ -1,11 +1,19 @@
-name: Manual Echo
+name: Manual Fail
 
 on:
   workflow_dispatch:
 
 jobs:
-  echo-job:
+  fail-job:
     runs-on: ubuntu-latest
     steps:
       - name: Echo running
         run: echo "running"
+
+      - name: Force failure
+        run: |
+          echo "Something went terribly wrong!"
+          exit 1
+
+      - name: This will never run
+        run: echo "You won't see this because the previous step failed"
