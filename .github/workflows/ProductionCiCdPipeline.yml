@@ -1,0 +1,158 @@
+name: Production CI/CD Pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch: # Allows manual triggering from the GitHub UI
+
+# 1. Concurrency Control: Cancel in-progress runs for the same PR/branch
+# However, never cancel an active deployment on the 'main' branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+# 2. Least-Privilege Permissions: Default to read-only access
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: '22.x'
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  # ------------------------------------------------------------------------
+  # JOB 1: Static Analysis, Type Checking & Security Audit
+  # ------------------------------------------------------------------------
+  quality:
+    name: Lint, Typecheck & Audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies (Clean Install)
+        run: npm ci
+
+      - name: Run Linter
+        run: npm run lint
+
+      - name: Run TypeScript Typecheck
+        run: npm run typecheck
+
+      - name: Security Audit (High/Critical vulnerabilities)
+        run: npm audit --audit-level=high
+
+  # ------------------------------------------------------------------------
+  # JOB 2: Unit & Integration Tests
+  # ------------------------------------------------------------------------
+  test:
+    name: Test Suite
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Tests with Coverage
+        run: npm run test:ci
+        env:
+          NODE_ENV: test
+
+      - name: Upload Coverage Report on Failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-logs-and-coverage
+          path: coverage/
+          retention-days: 5
+
+  # ------------------------------------------------------------------------
+  # JOB 3: Build & Push Container Image (Main Branch Only)
+  # ------------------------------------------------------------------------
+  build-and-push:
+    name: Build & Push Docker Image
+    needs: [quality, test]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      packages: write # Scoped elevated permission only for this job
+    outputs:
+      image_digest: ${{ steps.build.outputs.digest }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker metadata (tags, labels)
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=sha,prefix=
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push Docker image
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          # Layer caching using GitHub Actions Cache
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ------------------------------------------------------------------------
+  # JOB 4: Production Deployment with Environment Protection
+  # ------------------------------------------------------------------------
+  deploy:
+    name: Deploy to Production
+    needs: [build-and-push]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # Enforces GitHub Environment rules (manual approvals, branch restrictions, scoped secrets)
+    environment:
+      name: production
+      url: https://app.example.com
+    permissions:
+      id-token: write # Required for passwordless OIDC authentication with AWS/GCP/Azure
+      contents: read
+    steps:
+      - name: Deploy Immutable Image Digest
+        env:
+          IMAGE_DIGEST: ${{ needs.build-and-push.outputs.image_digest }}
+        run: |
+          echo "Deploying ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${IMAGE_DIGEST} to production..."
+          # Example: Authenticate via OIDC and update ECS / Cloud Run / Kubernetes deployment
