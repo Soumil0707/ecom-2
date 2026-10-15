@@ -1,0 +1,47 @@
+name: Check Types
+
+on:
+  workflow_dispatch:
+    inputs:
+      filter:
+        description: 'Specific app/package to check (optional, leave empty to check all)'
+        required: false
+        default: ''
+        type: string
+
+jobs:
+  check-types:
+    name: Check Types
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma Client
+        run: pnpm --filter @repo/product-db db:generate
+        env:
+          DATABASE_URL: "postgresql://postgres:postgres@localhost:5432/postgres"
+
+      - name: Run Type Check
+        run: |
+          if [ -n "${{ inputs.filter }}" ]; then
+            pnpm exec turbo run check-types --filter="${{ inputs.filter }}"
+          else
+            pnpm run check-types
+          fi
